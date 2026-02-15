@@ -6,61 +6,13 @@
   box-sizing: border-box;
 }
 
-:root {
-  /* Primary Colors */
-  --primary: #8b5cf6;
-  --primary-hover: #7c3aed;
-  --primary-light: #a78bfa;
-  
-  /* Background Colors */
-  --bg-dark: #0f0f14;
-  --bg-card: #1a1a24;
-  --bg-card-hover: #22222e;
-  --bg-input: #16161e;
-  
-  /* Border Colors */
-  --border: #2a2a3a;
-  --border-light: #3a3a4a;
-  
-  /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  
-  /* Status Colors */
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.15);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.15);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.15);
-  --info: #3b82f6;
-  --info-bg: rgba(59, 130, 246, 0.15);
-}
-
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-dark);
-  color: var(--text-primary);
-  min-height: 100vh;
 }
 
-#root {
-  min-height: 100vh;
-}
-
-/* Background Pattern */
-.app-background {
-  background: 
-    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-    var(--bg-dark);
-  min-height: 100vh;
-}
-
-/* Custom Scrollbar */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -71,248 +23,78 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #cbd5e1;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-light);
-}
-
-/* Smooth transitions */
-button, select, input, a {
-  transition: all 0.2s ease;
-}
-
-/* Focus states */
-input:focus, select:focus, button:focus {
-  outline: none;
-  ring: 2px;
-  ring-color: var(--primary);
-}
-
-/* Custom components */
-.glass-card {
-  background: rgba(26, 26, 36, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-}
-
-.gradient-border {
-  position: relative;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--primary), var(--info));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-/* Status indicators */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.online {
-  background: var(--success);
-  box-shadow: 0 0 8px var(--success);
-}
-
-.status-dot.offline {
-  background: var(--danger);
+  background: #94a3b8;
 }
 
 /* Card styles */
 .forex-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   transition: all 0.2s ease;
 }
 
 .forex-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-light);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Rate card */
+.rate-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.rate-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Chart wrapper */
+.chart-wrapper {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
 }
 
 /* Button styles */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  background: #2563eb;
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
   border: none;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  background: #1d4ed8;
 }
 
 .btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-secondary);
+  background: #f1f5f9;
+  color: #475569;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
-  border: 1px solid var(--border);
+  border: 1px solid #e2e8f0;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-secondary:hover {
-  background: var(--bg-card-hover);
-  color: var(--text-primary);
-  border-color: var(--border-light);
-}
-
-/* Tab styles */
-.tab-button {
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tab-button:hover {
-  color: var(--text-primary);
-  background: var(--bg-card);
-}
-
-.tab-button.active {
-  color: var(--text-primary);
-  background: var(--bg-card);
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
-}
-
-/* Input styles */
-.forex-input {
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text-primary);
-  width: 100%;
-}
-
-.forex-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.forex-input::placeholder {
-  color: var(--text-muted);
-}
-
-/* Select styles */
-.forex-select {
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.forex-select:focus {
-  border-color: var(--primary);
-}
-
-/* Price change animations */
-@keyframes priceUp {
-  0% { background: rgba(16, 185, 129, 0.3); }
-  100% { background: transparent; }
-}
-
-@keyframes priceDown {
-  0% { background: rgba(239, 68, 68, 0.3); }
-  100% { background: transparent; }
-}
-
-.price-up {
-  animation: priceUp 1s ease;
-}
-
-.price-down {
-  animation: priceDown 1s ease;
-}
-
-/* Pulse animation for live data */
-@keyframes livePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.live-indicator {
-  animation: livePulse 2s ease-in-out infinite;
-}
-
-/* Skeleton loading */
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Rate card specific */
-.rate-card {
-  padding: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  transition: all 0.2s ease;
-}
-
-.rate-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--primary);
-  transform: scale(1.02);
-}
-
-.rate-card.positive {
-  border-left: 3px solid var(--success);
-}
-
-.rate-card.negative {
-  border-left: 3px solid var(--danger);
-}
-
-/* Grid layouts */
-.grid-auto-fit {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-/* Chart container */
-.chart-wrapper {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  background: #e2e8f0;
 }
 
 /* Table styles */
@@ -324,21 +106,21 @@ input:focus, select:focus, button:focus {
 .forex-table th {
   text-align: left;
   padding: 12px 16px;
-  color: var(--text-muted);
+  color: #64748b;
   font-weight: 500;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .forex-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .forex-table tr:hover td {
-  background: var(--bg-card-hover);
+  background: #f8fafc;
 }
 
 /* Badge styles */
@@ -352,63 +134,104 @@ input:focus, select:focus, button:focus {
 }
 
 .badge-success {
-  background: var(--success-bg);
-  color: var(--success);
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .badge-danger {
-  background: var(--danger-bg);
-  color: var(--danger);
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .badge-warning {
-  background: var(--warning-bg);
-  color: var(--warning);
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .badge-info {
-  background: var(--info-bg);
-  color: var(--info);
+  background: #dbeafe;
+  color: #2563eb;
 }
 
-/* Tooltip */
-.tooltip {
-  position: relative;
+/* Tech card */
+.tech-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
 }
 
-.tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
+.tech-card:hover {
+  border-color: #3b82f6;
 }
 
-.tooltip:hover::after {
-  opacity: 1;
+/* Chart card */
+.chart-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Pattern card */
+.pattern-card {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.pattern-card.bullish {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.pattern-card.bearish {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.pattern-card.neutral {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+/* Input styles */
+.forex-input {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #1e293b;
+  width: 100%;
+}
+
+.forex-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.forex-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Select styles */
+.forex-select {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.forex-select:focus {
+  border-color: #2563eb;
+  outline: none;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .hide-mobile {
     display: none;
-  }
-  
-  .rate-card {
-    padding: 12px;
-  }
-  
-  .forex-table th,
-  .forex-table td {
-    padding: 10px 12px;
   }
 }
