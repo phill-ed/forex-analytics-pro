@@ -354,7 +354,7 @@ function App() {
                     <XAxis dataKey="labels" />
                     <YAxis domain={['auto', 'auto']} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="data" stroke="#667eea" fill="rgba(102, 126, 234, 0.1)" />
+                    <Line dataKey="data" stroke="#667eea" fill="rgba(102, 126, 234, 0.1)" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -492,7 +492,7 @@ function App() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg" />
                 <button
                   onClick={() => {
-                    const pair = (document.getElementById('pip-pair') as HTMLSelectElement).value
+                    const _pair = (document.getElementById('pip-pair') as HTMLSelectElement).value
                     const lots = parseFloat((document.getElementById('lots') as HTMLInputElement).value) || 1
                     const pipValue = lots * 10
                     alert(`Pip Value: $${pipValue.toFixed(2)} per lot`)
