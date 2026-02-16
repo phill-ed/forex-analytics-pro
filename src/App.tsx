@@ -757,44 +757,14 @@ const PortfolioPanel = () => {
   )
 }
 
-function App() {
-  const [activeTab, setActiveTab] = useState('dashboard')
-  const [selectedPair, setSelectedPair] = useState('EUR/USD')
-  const [selectedTimeframe, setSelectedTimeframe] = useState('1M')
-  const [rates, setRates] = useState<Rate[]>([])
-  const [loading, setLoading] = useState(true)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+const ChartComponent = ({ pair, timeframe }: { pair: string; timeframe: string }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<any>(null)
   const candleSeriesRef = useRef<any>(null)
 
-  const loadRates = useCallback(async () => {
-    setLoading(true)
-    const realRates = await fetchRealRates()
-    const newRates = pairs.map(pair => generateRate(pair, realRates))
-    setRates(newRates)
-    setLoading(false)
-  }, [])
-
-  const loadChartData = useCallback(async () => {
-    if (!chartRef.current) return
-    const tf = timeframes.find(t => t.value === selectedTimeframe) || timeframes[2]
-    const hp = await fetchHistoricalData(selectedPair, 90)
-    const data = generateCandleData(hp, tf.candles, tf.interval)
-    if (candleSeriesRef.current) {
-      candleSeriesRef.current.setData(data)
-      chartRef.current.timeScale().fitContent()
-    }
-  }, [selectedPair, selectedTimeframe])
-
-  useEffect(() => {
-    loadRates()
-    const interval = setInterval(loadRates, 30000)
-    return () => clearInterval(interval)
-  }, [loadRates])
-
   useEffect(() => {
     if (!chartContainerRef.current) return
+
     const chart = createChart(chartContainerRef.current, {
       layout: { background: { type: ColorType.Solid, color: '#ffffff' }, textColor: '#374151' },
       grid: { vertLines: { color: '#f3f4f6' }, horzLines: { color: '#f3f4f6' } },
@@ -802,6 +772,7 @@ function App() {
       rightPriceScale: { borderColor: '#e5e7eb' },
       timeScale: { borderColor: '#e5e7eb', timeVisible: true },
     })
+
     const candleSeries = chart.addCandlestickSeries({
       upColor: '#10b981',
       downColor: '#ef4444',
@@ -810,8 +781,21 @@ function App() {
       wickUpColor: '#10b981',
       wickDownColor: '#ef4444',
     })
+
     chartRef.current = chart
     candleSeriesRef.current = candleSeries
+
+    const loadData = async () => {
+      const tf = timeframes.find(t => t.value === timeframe) || timeframes[2]
+      const hp = await fetchHistoricalData(pair, 90)
+      const data = generateCandleData(hp, tf.candles, tf.interval)
+      if (candleSeriesRef.current) {
+        candleSeriesRef.current.setData(data)
+        chart.timeScale().fitContent()
+      }
+    }
+
+    loadData()
 
     const handleResize = () => {
       if (chartContainerRef.current) {
@@ -821,17 +805,36 @@ function App() {
     window.addEventListener('resize', handleResize)
     handleResize()
 
-    loadChartData()
-
     return () => {
       window.removeEventListener('resize', handleResize)
       chart.remove()
     }
+  }, [pair, timeframe])
+
+  return <div ref={chartContainerRef} className="w-full h-[400px]" />
+}
+
+function App() {
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [selectedPair, setSelectedPair] = useState('EUR/USD')
+  const [selectedTimeframe, setSelectedTimeframe] = useState('1M')
+  const [rates, setRates] = useState<Rate[]>([])
+  const [loading, setLoading] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const loadRates = useCallback(async () => {
+    setLoading(true)
+    const realRates = await fetchRealRates()
+    const newRates = pairs.map(pair => generateRate(pair, realRates))
+    setRates(newRates)
+    setLoading(false)
   }, [])
 
   useEffect(() => {
-    loadChartData()
-  }, [selectedPair, selectedTimeframe, loadChartData])
+    loadRates()
+    const interval = setInterval(loadRates, 30000)
+    return () => clearInterval(interval)
+  }, [loadRates])
 
   const renderContent = () => {
     switch (activeTab) {
@@ -932,7 +935,7 @@ function App() {
 
           {activeTab === 'analysis' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-              <div ref={chartContainerRef} className="w-full h-[400px]" />
+              <ChartComponent pair={selectedPair} timeframe={selectedTimeframe} />
             </div>
           )}
 
