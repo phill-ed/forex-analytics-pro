@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { LayoutDashboard, TrendingUp, Calculator, Newspaper, Star, Briefcase, RefreshCw, ChevronLeft, ChevronRight, Search, Bell, Settings, User, ZoomIn, ZoomOut, Maximize2, Activity, Target, CheckCircle, XCircle, BarChart3, LineChart, Brain, Zap, Clock, TrendingUp as TrendingUpIcon, Loader2, Calendar, ExternalLink, DollarSign, Building, Globe, TrendingDown as TrendingDownIcon } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, Calculator, Newspaper, Star, Briefcase, RefreshCw, ChevronLeft, ChevronRight, Search, Bell, Settings, User, ZoomIn, ZoomOut, Maximize2, Activity, Target, CheckCircle, XCircle, BarChart3, LineChart, Brain, Zap, Clock, TrendingUp as TrendingUpIcon, Loader2, Calendar, ExternalLink, DollarSign, Building, Globe, TrendingDown as TrendingDownIcon, Info, Code, TrendingUp as TrendingUpIcon2, BarChart2, PieChart, Target as TargetIcon, Shield, Globe2, Cpu } from 'lucide-react'
 import { createChart, ColorType, CrosshairMode, Time } from 'lightweight-charts'
 import './App.css'
 
@@ -237,6 +237,7 @@ const navItems = [
   { id: 'news', label: 'Market News', icon: Newspaper },
   { id: 'watchlist', label: 'Watchlist', icon: Star },
   { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
+  { id: 'about', label: 'About', icon: Info },
 ]
 
 const impactColors: Record<string, { bg: string; text: string }> = { high: { bg: 'bg-red-100', text: 'text-red-700' }, medium: { bg: 'bg-yellow-100', text: 'text-yellow-700' }, low: { bg: 'bg-green-100', text: 'text-green-700' } }
@@ -757,6 +758,336 @@ const PortfolioPanel = () => {
   )
 }
 
+const AboutPanel = () => {
+  return (
+    <div className="space-y-6">
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Info size={24} className="text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Forex Analytics Pro</h2>
+            <p className="text-sm text-gray-500">Version 1.0.0 • Professional Trading Analysis Platform</p>
+          </div>
+        </div>
+        
+        <div className="prose prose-sm max-w-none text-gray-600">
+          <p className="mb-4">
+            Forex Analytics Pro is a comprehensive trading analysis platform designed for forex traders. 
+            It provides real-time market data, technical analysis indicators, trading recommendations, 
+            and market news to help traders make informed decisions.
+          </p>
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+            <Globe2 size={24} className="text-green-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Data Sources & APIs</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Globe size={18} className="text-blue-600" />
+              <h4 className="font-medium text-gray-900">Frankfurter API</h4>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              Primary data source for real-time and historical exchange rates.
+            </p>
+            <div className="bg-gray-50 rounded-lg p-3 text-xs font-mono text-gray-700 overflow-x-auto">
+              https://api.frankfurter.app/latest?from=EUR&to=USD,JPY,GBP,CHF,AUD,CAD,NZD
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Free</span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">No API Key Required</span>
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Real-time Data</span>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Code size={18} className="text-purple-600" />
+              <h4 className="font-medium text-gray-900">Supported Currency Pairs</h4>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {['EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'AUD/USD', 'USD/CAD', 'EUR/GBP', 'EUR/JPY'].map(pair => (
+                <span key={pair} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-lg text-center">{pair}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+            <Brain size={24} className="text-purple-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Technical Analysis Methods</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity size={18} className="text-red-600" />
+                <h4 className="font-medium text-gray-900">RSI (Relative Strength Index)</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Momentum oscillator measuring the speed and change of price movements.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• Overbought: RSI &gt; 70</div>
+                <div>• Oversold: RSI &lt; 30</div>
+                <div>• Neutral: 40-60</div>
+                <div className="mt-1">Period: 14</div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <LineChart size={18} className="text-blue-600" />
+                <h4 className="font-medium text-gray-900">MACD</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Moving Average Convergence Divergence - trend-following momentum indicator.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• Fast EMA: 12 periods</div>
+                <div>• Slow EMA: 26 periods</div>
+                <div>• Signal Line: 9 periods</div>
+                <div className="mt-1">Histogram shows momentum</div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart2 size={18} className="text-orange-600" />
+                <h4 className="font-medium text-gray-900">Bollinger Bands</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Volatility bands placed above and below a moving average.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• SMA Period: 20</div>
+                <div>• Standard Deviations: 2</div>
+                <div>• Price near bands = potential reversal</div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TargetIcon size={18} className="text-green-600" />
+                <h4 className="font-medium text-gray-900">Stochastic Oscillator</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Compares closing price to price range over a period.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• %K Period: 14</div>
+                <div>• Overbought: &gt; 80</div>
+                <div>• Oversold: &lt; 20</div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUpIcon2 size={18} className="text-indigo-600" />
+                <h4 className="font-medium text-gray-900">SMA (Simple Moving Average)</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Unweighted mean of previous data points over a specific period.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• SMA 20: Short-term trend</div>
+                <div>• SMA 50: Medium-term trend</div>
+                <div>• Used for trend analysis</div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap size={18} className="text-yellow-600" />
+                <h4 className="font-medium text-gray-900">ATR (Average True Range)</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Measures market volatility by decomposing the range of price.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600">
+                <div>• Period: 14</div>
+                <div>• Used for stop loss calculation</div>
+                <div>• Measures volatility</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <Cpu size={24} className="text-orange-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Trading Recommendation Engine</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Our AI-powered recommendation engine analyzes multiple technical indicators to generate trading signals:
+          </p>
+          
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h4 className="font-medium text-gray-900 mb-3">Signal Scoring System</h4>
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">+2</span>
+                <span>RSI oversold (&lt;30) or overbought (&gt;70)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">+2</span>
+                <span>MACD bullish or bearish crossover</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">+2</span>
+                <span>Price at Bollinger Band extremes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">+3</span>
+                <span>Strong trend (SMA confirmation)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">+1</span>
+                <span>Stochastic oversold/overbought</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp size={18} className="text-green-600" />
+                <h4 className="font-medium text-green-700">BUY Signal</h4>
+              </div>
+              <p className="text-sm text-green-600">Score ≥ 4</p>
+              <p className="text-xs text-green-600 mt-1">Strong bullish momentum</p>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={18} className="text-yellow-600" />
+                <h4 className="font-medium text-yellow-700">NEUTRAL</h4>
+              </div>
+              <p className="text-sm text-yellow-600">Score -3 to 3</p>
+              <p className="text-xs text-yellow-600 mt-1">No clear direction</p>
+            </div>
+            
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingDownIcon size={18} className="text-red-600" />
+                <h4 className="font-medium text-red-700">SELL Signal</h4>
+              </div>
+              <p className="text-sm text-red-600">Score ≤ -4</p>
+              <p className="text-xs text-red-600 mt-1">Strong bearish momentum</p>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-900 mb-3">Risk Management</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-gray-500 mb-1">Stop Loss</div>
+                <div className="font-semibold text-red-600">2 × ATR below/above entry</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">Take Profit</div>
+                <div className="font-semibold text-green-600">1.5 × ATR from entry</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">Risk/Reward Ratio</div>
+                <div className="font-semibold text-blue-600">1:1.5 minimum</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">Confidence Level</div>
+                <div className="font-semibold text-purple-600">50-95% based on signal strength</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+            <PieChart size={24} className="text-cyan-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Supported Timeframes</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: '1 Day', value: '1D', candles: 24, desc: 'Intraday trading' },
+            { label: '1 Week', value: '1W', candles: 168, desc: 'Short-term analysis' },
+            { label: '1 Month', value: '1M', candles: 720, desc: 'Medium-term trends' },
+            { label: '3 Months', value: '3M', candles: 2160, desc: 'Long-term analysis' },
+          ].map(tf => (
+            <div key={tf.value} className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="text-lg font-bold text-gray-900">{tf.label}</div>
+              <div className="text-xs text-gray-500 mt-1">{tf.desc}</div>
+              <div className="text-xs text-blue-600 mt-2">{tf.candles} candles</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+            <Shield size={24} className="text-teal-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Technology Stack</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[
+            { name: 'React 18', desc: 'UI Framework', icon: '⚛️' },
+            { name: 'TypeScript', desc: 'Type Safety', icon: '📘' },
+            { name: 'Vite', desc: 'Build Tool', icon: '⚡' },
+            { name: 'Lightweight Charts', desc: 'TradingView Library', icon: '📊' },
+            { name: 'Tailwind CSS', desc: 'Styling', icon: '🎨' },
+            { name: 'Frankfurter API', desc: 'Market Data', icon: '🌐' },
+          ].map(tech => (
+            <div key={tech.name} className="border border-gray-200 rounded-lg p-3 flex items-center gap-3">
+              <span className="text-2xl">{tech.icon}</span>
+              <div>
+                <div className="font-medium text-gray-900 text-sm">{tech.name}</div>
+                <div className="text-xs text-gray-500">{tech.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="chart-card bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="text-center py-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Disclaimer</h3>
+          <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+            Forex Analytics Pro is for educational and informational purposes only. 
+            Trading forex involves substantial risk of loss. Past performance does not guarantee future results. 
+            Always conduct your own research and consider seeking advice from financial professionals before making trading decisions.
+          </p>
+          <div className="mt-4 text-xs text-gray-500">
+            © 2026 Forex Analytics Pro • Built with React & TradingView Lightweight Charts
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const ChartComponent = ({ pair, timeframe }: { pair: string; timeframe: string }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<any>(null)
@@ -850,6 +1181,8 @@ function App() {
         return <WatchlistPanel />
       case 'portfolio':
         return <PortfolioPanel />
+      case 'about':
+        return <AboutPanel />
       default:
         return <DashboardPanel rates={rates} selectedPair={selectedPair} onPairSelect={setSelectedPair} />
     }
