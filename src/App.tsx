@@ -305,31 +305,66 @@ const AnalysisPanel = ({ pair, timeframe }: { pair: string; timeframe: string })
   const [inds, setInds] = useState<any[]>([])
   const [sup, setSup] = useState<number[]>([])
   const [res, setRes] = useState<number[]>([])
+  const [realPrices, setRealPrices] = useState<number[]>([])
   
   useEffect(() => {
     const load = async () => {
       setLoading(true)
-      const tf = timeframes.find(t => t.value === timeframe) || timeframes[2]
-      const hp = await fetchHistoricalData(pair, 90)
-      const d = generateCandleData(hp, tf.candles, tf.interval)
-      const pd = d.map(x => x.close)
-      setCp(pd[pd.length - 1])
-      setAtr(calculateATR(d))
-      setTrend(analyzeTrend(d))
-      setRec(generateRecommendation(pair, d, timeframe))
-      const { support, resistance } = calculateSupportResistance(d)
-      setSup(support)
-      setRes(resistance)
-      const bb = calculateBollingerBands(pd)
-      const macd = calculateMACD(pd)
-      const rsi = calculateRSI(pd)
-      const stoch = calculateStochastic(d)
-      setInds([
-        { title: 'RSI (14)', value: rsi.toFixed(2), signal: rsi < 30 ? 'bullish' : rsi > 70 ? 'bearish' : 'neutral', icon: Activity, description: 'momentum' },
-        { title: 'MACD', value: macd.histogram > 0 ? `+${macd.histogram.toFixed(5)}` : macd.histogram.toFixed(5), signal: macd.histogram > 0 ? 'bullish' : 'bearish', icon: LineChart, description: 'trend' },
-        { title: 'Bollinger', value: `${bb.upper.toFixed(5)} / ${bb.lower.toFixed(5)}`, signal: cp < bb.lower ? 'bullish' : cp > bb.upper ? 'bearish' : 'neutral', icon: BarChart3, description: 'volatility' },
-        { title: 'Stochastic', value: `${stoch.k.toFixed(0)}`, signal: stoch.k < 20 ? 'bullish' : stoch.k > 80 ? 'bearish' : 'neutral', icon: Target, description: 'momentum' },
-      ])
+      try {
+        const [base, quote] = pair.split('/')
+        const days = timeframe === '1D' ? 7 : timeframe === '1W' ? 30 : timeframe === '1M' ? 90 : 180
+        const endDate = new Date().toISOString().split('T')[0]
+        const startDate = new Date(Date.now() - days * 86400000).toISOString().split('T')[0]
+        
+        const response = await fetch(`https://api.frankfurter.app/${startDate}..${endDate}?from=${base}&to=${quote}`)
+        const data = await response.json()
+        
+        const prices: number[] = []
+        if (data.rates) {
+          const dates = Object.keys(data.rates).sort()
+          dates.forEach(date => {
+            if (data.rates[date][quote]) {
+              prices.push(data.rates[date][quote])
+            }
+          })
+        }
+        setRealPrices(prices)
+        
+        // Create candles from daily data
+        const d: CandleData[] = []
+        prices.forEach((price, index) => {
+          const prevPrice = index > 0 ? prices[index - 1] : price
+          const vol = Math.abs(price - prevPrice) * 0.5
+          d.push({
+            time: new Date(dates[index]).getTime() / 1000 as Time,
+            open: prevPrice,
+            high: Math.max(prevPrice, price) + vol * 0.3,
+            low: Math.min(prevPrice, price) - vol * 0.3,
+            close: price
+          })
+        })
+        
+        const pd = prices
+        setCp(pd[pd.length - 1])
+        setAtr(calculateATR(d))
+        setTrend(analyzeTrend(d))
+        setRec(generateRecommendation(pair, d, timeframe))
+        const { support, resistance } = calculateSupportResistance(d)
+        setSup(support)
+        setRes(resistance)
+        const bb = calculateBollingerBands(pd)
+        const macd = calculateMACD(pd)
+        const rsi = calculateRSI(pd)
+        const stoch = calculateStochastic(d)
+        setInds([
+          { title: 'RSI (14)', value: rsi.toFixed(2), signal: rsi < 30 ? 'bullish' : rsi > 70 ? 'bearish' : 'neutral', icon: Activity, description: 'momentum' },
+          { title: 'MACD', value: macd.histogram > 0 ? `+${macd.histogram.toFixed(5)}` : macd.histogram.toFixed(5), signal: macd.histogram > 0 ? 'bullish' : 'bearish', icon: LineChart, description: 'trend' },
+          { title: 'Bollinger', value: `${bb.upper.toFixed(5)} / ${bb.lower.toFixed(5)}`, signal: cp < bb.lower ? 'bullish' : cp > bb.upper ? 'bearish' : 'neutral', icon: BarChart3, description: 'volatility' },
+          { title: 'Stochastic', value: `${stoch.k.toFixed(0)}`, signal: stoch.k < 20 ? 'bullish' : stoch.k > 80 ? 'bearish' : 'neutral', icon: Target, description: 'momentum' },
+        ])
+      } catch (error) {
+        console.error('Error analyzing data:', error)
+      }
       setLoading(false)
     }
     load()
@@ -1094,6 +1129,7 @@ const ChartComponent = ({ pair, timeframe }: { pair: string; timeframe: string }
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<any>(null)
   const candleSeriesRef = useRef<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -1119,13 +1155,47 @@ const ChartComponent = ({ pair, timeframe }: { pair: string; timeframe: string }
     candleSeriesRef.current = candleSeries
 
     const loadData = async () => {
-      const tf = timeframes.find(t => t.value === timeframe) || timeframes[2]
-      const hp = await fetchHistoricalData(pair, 90)
-      const data = generateCandleData(hp, tf.candles, tf.interval)
-      if (candleSeriesRef.current) {
-        candleSeriesRef.current.setData(data)
-        chart.timeScale().fitContent()
+      setLoading(true)
+      try {
+        const [base, quote] = pair.split('/')
+        const days = timeframe === '1D' ? 7 : timeframe === '1W' ? 30 : timeframe === '1M' ? 90 : 180
+        const endDate = new Date().toISOString().split('T')[0]
+        const startDate = new Date(Date.now() - days * 86400000).toISOString().split('T')[0]
+        
+        const response = await fetch(`https://api.frankfurter.app/${startDate}..${endDate}?from=${base}&to=${quote}`)
+        const data = await response.json()
+        
+        if (data.rates) {
+          const candles: CandleData[] = []
+          const dates = Object.keys(data.rates).sort()
+          
+          dates.forEach((date, index) => {
+            const price = data.rates[date][quote]
+            const prevPrice = index > 0 ? data.rates[dates[index - 1]][quote] : price
+            const vol = Math.abs(price - prevPrice) * 0.5
+            const open = prevPrice
+            const close = price
+            const high = Math.max(open, close) + vol * 0.3
+            const low = Math.min(open, close) - vol * 0.3
+            
+            candles.push({
+              time: new Date(date).getTime() / 1000 as Time,
+              open,
+              high,
+              low,
+              close
+            })
+          })
+          
+          if (candleSeriesRef.current) {
+            candleSeriesRef.current.setData(candles)
+            chart.timeScale().fitContent()
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chart data:', error)
       }
+      setLoading(false)
     }
 
     loadData()
@@ -1144,7 +1214,16 @@ const ChartComponent = ({ pair, timeframe }: { pair: string; timeframe: string }
     }
   }, [pair, timeframe])
 
-  return <div ref={chartContainerRef} className="w-full h-[400px]" />
+  return (
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+          <Loader2 className="animate-spin text-blue-600" size={32} />
+        </div>
+      )}
+      <div ref={chartContainerRef} className="w-full h-[400px]" />
+    </div>
+  )
 }
 
 function App() {
