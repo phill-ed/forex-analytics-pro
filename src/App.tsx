@@ -1,16 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Line } from 'react-chartjs-2'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   LayoutDashboard,
   TrendingUp,
@@ -27,19 +15,8 @@ import {
   Settings,
   User
 } from 'lucide-react'
+import { createChart, ColorType, CrosshairMode } from 'lightweight-charts'
 import './App.css'
-
-// Register ChartJS
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
 
 // Types
 interface Rate {
@@ -48,6 +25,14 @@ interface Rate {
   ask: number
   change: number
   changePercent: number
+}
+
+interface CandleData {
+  time: string
+  open: number
+  high: number
+  low: number
+  close: number
 }
 
 // Generate random rate
@@ -69,11 +54,27 @@ const generateRate = (pair: string): Rate => {
   }
 }
 
-// Generate chart data
-const generateChartData = () => {
-  const labels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
-  const prices = Array.from({ length: 24 }, (_, i) => 1.08 + Math.sin(i / 3) * 0.01 + (Math.random() - 0.5) * 0.005)
-  return { labels, prices }
+// Generate candlestick data
+const generateCandleData = (count: number = 50): CandleData[] => {
+  const data: CandleData[] = []
+  let basePrice = 1.0850
+  
+  for (let i = count; i > 0; i--) {
+    const date = new Date()
+    date.setHours(date.getHours() - i)
+    const time = date.toISOString().split('T')[0] as string
+    
+    const volatility = basePrice * 0.002
+    const open = basePrice + (Math.random() - 0.5) * volatility
+    const close = open + (Math.random() - 0.5) * volatility
+    const high = Math.max(open, close) + Math.random() * volatility * 0.5
+    const low = Math.min(open, close) - Math.random() * volatility * 0.5
+    
+    data.push({ time, open, high, low, close })
+    basePrice = close
+  }
+  
+  return data
 }
 
 // Navigation items
@@ -91,18 +92,89 @@ function App() {
   const [selectedPair, setSelectedPair] = useState('EUR/USD')
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [rates, setRates] = useState<Rate[]>([])
-  const [chartData, setChartData] = useState<{ labels: string[], prices: number[] }>({ labels: [], prices: [] })
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  
+  const chartContainerRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<any>(null)
+  const candleSeriesRef = useRef<any>(null)
 
   const pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'AUD/USD', 'USD/CAD', 'EUR/GBP', 'EUR/JPY']
 
   const refreshData = useCallback(() => {
     const newRates = pairs.map(generateRate)
     setRates(newRates)
-    setChartData(generateChartData())
     setLastUpdated(new Date())
   }, [])
 
+  // Initialize chart
+  useEffect(() => {
+    if (!chartContainerRef.current) return
+
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: '#ffffff' },
+        textColor: '#64748b',
+      },
+      grid: {
+        vertLines: { color: '#f1f5f9' },
+        horzLines: { color: '#f1f5f9' },
+      },
+      width: chartContainerRef.current.clientWidth,
+      height: 400,
+      crosshair: {
+        mode: CrosshairMode.Normal,
+      },
+      timeScale: {
+        borderColor: '#e5e7eb',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+      rightPriceScale: {
+        borderColor: '#e5e7eb',
+      },
+    })
+
+    const newCandleSeries = chart.addCandlestickSeries({
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderDownColor: '#ef4444',
+      borderUpColor: '#10b981',
+      wickDownColor: '#ef4444',
+      wickUpColor: '#10b981',
+    })
+
+    chartRef.current = chart
+    candleSeriesRef.current = newCandleSeries
+
+    // Handle resize
+    const handleResize = () => {
+      if (chartContainerRef.current && chartRef.current) {
+        chartRef.current.applyOptions({ 
+          width: chartContainerRef.current.clientWidth 
+        })
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (chartRef.current) {
+        chartRef.current.remove()
+      }
+    }
+  }, [])
+
+  // Update chart data when pair changes
+  useEffect(() => {
+    const data = generateCandleData(50)
+    
+    if (candleSeriesRef.current) {
+      candleSeriesRef.current.setData(data)
+    }
+  }, [selectedPair])
+
+  // Initial data load and refresh interval
   useEffect(() => {
     refreshData()
     const interval = setInterval(refreshData, 30000)
@@ -113,48 +185,6 @@ function App() {
   const gainers = rates.filter(r => r.changePercent > 0).length
   const losers = rates.filter(r => r.changePercent < 0).length
   const selectedRate = rates.find(r => r.pair === selectedPair)
-
-  // Chart config
-  const lineChartData = {
-    labels: chartData.labels,
-    datasets: [{
-      label: selectedPair,
-      data: chartData.prices,
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      borderWidth: 2,
-    }]
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1e293b',
-        padding: 12,
-        titleColor: '#f1f5f9',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
-        borderWidth: 1,
-      }
-    },
-    scales: {
-      x: { 
-        grid: { display: false },
-        ticks: { color: '#64748b', font: { size: 11 } }
-      },
-      y: { 
-        grid: { color: '#f1f5f9' },
-        ticks: { color: '#64748b', font: { size: 11 } }
-      }
-    },
-  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -323,11 +353,11 @@ function App() {
                 </div>
               </div>
 
-              {/* Main Chart */}
+              {/* Candlestick Chart */}
               <div className="chart-card">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{selectedPair} Price Chart</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{selectedPair} Candlestick Chart</h3>
                     <p className="text-sm text-gray-500">Last updated: {lastUpdated.toLocaleTimeString()}</p>
                   </div>
                   <div className="flex gap-2">
@@ -341,8 +371,16 @@ function App() {
                     ))}
                   </div>
                 </div>
-                <div className="h-96">
-                  <Line data={lineChartData} options={chartOptions} />
+                <div ref={chartContainerRef} className="h-[400px]" />
+                <div className="flex items-center gap-4 mt-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-sm bg-green-500"></span>
+                    Bullish
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-sm bg-red-500"></span>
+                    Bearish
+                  </span>
                 </div>
               </div>
 
