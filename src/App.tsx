@@ -60,9 +60,8 @@ const generateCandleData = (count: number = 50): CandleData[] => {
   let basePrice = 1.0850
   
   for (let i = count; i > 0; i--) {
-    const date = new Date()
-    date.setHours(date.getHours() - i)
-    const time = date.toISOString().split('T')[0] as string
+    // Use Unix timestamp in seconds for unique ordering
+    const timestamp = Math.floor(Date.now() / 1000) - (i * 3600)
     
     const volatility = basePrice * 0.002
     const open = basePrice + (Math.random() - 0.5) * volatility
@@ -70,7 +69,7 @@ const generateCandleData = (count: number = 50): CandleData[] => {
     const high = Math.max(open, close) + Math.random() * volatility * 0.5
     const low = Math.min(open, close) - Math.random() * volatility * 0.5
     
-    data.push({ time, open, high, low, close })
+    data.push({ time: timestamp as any, open, high, low, close })
     basePrice = close
   }
   
