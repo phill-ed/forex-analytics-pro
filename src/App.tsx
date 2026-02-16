@@ -55,26 +55,28 @@ const fetchHistoricalData = async (pair: string, days: number = 30): Promise<num
 
 const generateCandleData = (prices: number[], count: number, interval: number = 3600): CandleData[] => {
   const data: CandleData[] = []
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  
   if (prices.length < 2) {
     let bp = 1.085
     for (let i = count; i > 0; i--) {
-      const ts = Math.floor(Date.now() / interval) * interval - (i * interval)
+      const ts = (nowSeconds - (i * interval)) as Time
       const vol = bp * 0.002
       const o = bp + (Math.random() - 0.5) * vol
       const c = o + (Math.random() - 0.5) * vol
-      data.push({ time: ts as Time, open: o, high: Math.max(o, c) + Math.random() * vol * 0.5, low: Math.min(o, c) - Math.random() * vol * 0.5, close: c })
+      data.push({ time: ts, open: o, high: Math.max(o, c) + Math.random() * vol * 0.5, low: Math.min(o, c) - Math.random() * vol * 0.5, close: c })
       bp = c
     }
     return data
   }
   let bp = prices[0]
   for (let i = count; i > 0; i--) {
-    const ts = Math.floor(Date.now() / interval) * interval - (i * interval)
+    const ts = (nowSeconds - (i * interval)) as Time
     const tf = (prices[Math.min(prices.length - 1, Math.floor((count - i) / (count / prices.length)))] - prices[0]) / (prices[0] || 1)
     const vol = bp * 0.002 + Math.abs(prices[prices.length - 1] - prices[0]) * 0.3
     const o = bp + (Math.random() - 0.5 + tf * 0.1) * vol
     const c = o + (Math.random() - 0.5 + tf * 0.05) * vol
-    data.push({ time: ts as Time, open: o, high: Math.max(o, c) + Math.random() * vol * 0.5, low: Math.min(o, c) - Math.random() * vol * 0.5, close: c })
+    data.push({ time: ts, open: o, high: Math.max(o, c) + Math.random() * vol * 0.5, low: Math.min(o, c) - Math.random() * vol * 0.5, close: c })
     bp = c
   }
   if (prices.length > 0) {
