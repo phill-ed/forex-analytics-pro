@@ -13,9 +13,12 @@ import {
   Search,
   Bell,
   Settings,
-  User
+  User,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
 } from 'lucide-react'
-import { createChart, ColorType, CrosshairMode } from 'lightweight-charts'
+import { createChart, ColorType, CrosshairMode, Time } from 'lightweight-charts'
 import './App.css'
 
 // Types
@@ -28,12 +31,30 @@ interface Rate {
 }
 
 interface CandleData {
-  time: string
+  time: Time
   open: number
   high: number
   low: number
   close: number
 }
+
+interface Timeframe {
+  label: string
+  value: string
+  candles: number
+  interval: number // seconds
+}
+
+// Timeframe options
+const timeframes: Timeframe[] = [
+  { label: '1D', value: '1D', candles: 24, interval: 3600 },
+  { label: '1W', value: '1W', candles: 168, interval: 3600 },
+  { label: '1M', value: '1M', candles: 720, interval: 3600 },
+  { label: '3M', value: '3M', candles: 2160, interval: 3600 },
+  { label: '6M', value: '6M', candles: 4320, interval: 3600 },
+  { label: '1Y', value: '1Y', candles: 8760, interval: 3600 },
+  { label: 'ALL', value: 'ALL', candles: 17520, interval: 3600 },
+]
 
 // Generate random rate
 const generateRate = (pair: string): Rate => {
@@ -54,14 +75,13 @@ const generateRate = (pair: string): Rate => {
   }
 }
 
-// Generate candlestick data
-const generateCandleData = (count: number = 50): CandleData[] => {
+// Generate candlestick data based on timeframe
+const generateCandleData = (count: number, intervalSeconds: number = 3600): CandleData[] => {
   const data: CandleData[] = []
   let basePrice = 1.0850
   
   for (let i = count; i > 0; i--) {
-    // Use Unix timestamp in seconds for unique ordering
-    const timestamp = Math.floor(Date.now() / 1000) - (i * 3600)
+    const timestamp = Math.floor(Date.now() / intervalSeconds) * intervalSeconds - (i * intervalSeconds)
     
     const volatility = basePrice * 0.002
     const open = basePrice + (Math.random() - 0.5) * volatility
@@ -69,7 +89,7 @@ const generateCandleData = (count: number = 50): CandleData[] => {
     const high = Math.max(open, close) + Math.random() * volatility * 0.5
     const low = Math.min(open, close) - Math.random() * volatility * 0.5
     
-    data.push({ time: timestamp as any, open, high, low, close })
+    data.push({ time: timestamp as Time, open, high, low, close })
     basePrice = close
   }
   
@@ -89,6 +109,7 @@ const navItems = [
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedPair, setSelectedPair] = useState('EUR/USD')
+  const [selectedTimeframe, setSelectedTimeframe] = useState('1M')
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [rates, setRates] = useState<Rate[]>([])
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -105,7 +126,7 @@ function App() {
     setLastUpdated(new Date())
   }, [])
 
-  // Initialize chart
+  // Initialize chart with zoom/scroll enabled
   useEffect(() => {
     if (!chartContainerRef.current) return
 
@@ -119,7 +140,7 @@ function App() {
         horzLines: { color: '#f1f5f9' },
       },
       width: chartContainerRef.current.clientWidth,
-      height: 400,
+      height: 450,
       crosshair: {
         mode: CrosshairMode.Normal,
       },
@@ -127,9 +148,28 @@ function App() {
         borderColor: '#e5e7eb',
         timeVisible: true,
         secondsVisible: false,
+        rightOffset: 10,
+        barSpacing: 6,
+        minBarSpacing: 2,
+        maxBarSpacing: 50,
       },
       rightPriceScale: {
         borderColor: '#e5e7eb',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: true,
+        mouseWheel: true,
+        pinch: true,
       },
     })
 
@@ -164,14 +204,18 @@ function App() {
     }
   }, [])
 
-  // Update chart data when pair changes
+  // Update chart data when pair or timeframe changes
   useEffect(() => {
-    const data = generateCandleData(50)
+    const tf = timeframes.find(t => t.value === selectedTimeframe) || timeframes[2]
+    const data = generateCandleData(tf.candles, tf.interval)
     
     if (candleSeriesRef.current) {
       candleSeriesRef.current.setData(data)
+      if (chartRef.current) {
+        chartRef.current.timeScale().fitContent()
+      }
     }
-  }, [selectedPair])
+  }, [selectedPair, selectedTimeframe])
 
   // Initial data load and refresh interval
   useEffect(() => {
@@ -179,6 +223,33 @@ function App() {
     const interval = setInterval(refreshData, 30000)
     return () => clearInterval(interval)
   }, [refreshData])
+
+  // Chart controls
+  const handleZoomIn = () => {
+    if (chartRef.current) {
+      const timeScale = chartRef.current.timeScale()
+      const currentOptions = timeScale.options()
+      timeScale.applyOptions({
+        barSpacing: Math.min(currentOptions.barSpacing * 1.5, 100),
+      })
+    }
+  }
+
+  const handleZoomOut = () => {
+    if (chartRef.current) {
+      const timeScale = chartRef.current.timeScale()
+      const currentOptions = timeScale.options()
+      timeScale.applyOptions({
+        barSpacing: Math.max(currentOptions.barSpacing / 1.5, 2),
+      })
+    }
+  }
+
+  const handleFitContent = () => {
+    if (chartRef.current) {
+      chartRef.current.timeScale().fitContent()
+    }
+  }
 
   // Quick stats
   const gainers = rates.filter(r => r.changePercent > 0).length
@@ -354,24 +425,60 @@ function App() {
 
               {/* Candlestick Chart */}
               <div className="chart-card">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{selectedPair} Candlestick Chart</h3>
                     <p className="text-sm text-gray-500">Last updated: {lastUpdated.toLocaleTimeString()}</p>
                   </div>
-                  <div className="flex gap-2">
-                    {['1H', '4H', '1D', '1W', '1M'].map(tf => (
-                      <button 
-                        key={tf} 
-                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  
+                  <div className="flex items-center gap-2">
+                    {/* Timeframe Selector */}
+                    <div className="flex bg-gray-100 rounded-lg p-1">
+                      {timeframes.map(tf => (
+                        <button
+                          key={tf.value}
+                          onClick={() => setSelectedTimeframe(tf.value)}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                            selectedTimeframe === tf.value
+                              ? 'bg-white text-blue-600 shadow-sm'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
+                        >
+                          {tf.label}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Zoom Controls */}
+                    <div className="flex bg-gray-100 rounded-lg p-1">
+                      <button
+                        onClick={handleZoomIn}
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-white rounded-md transition-all"
+                        title="Zoom In"
                       >
-                        {tf}
+                        <ZoomIn size={18} />
                       </button>
-                    ))}
+                      <button
+                        onClick={handleZoomOut}
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-white rounded-md transition-all"
+                        title="Zoom Out"
+                      >
+                        <ZoomOut size={18} />
+                      </button>
+                      <button
+                        onClick={handleFitContent}
+                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-white rounded-md transition-all"
+                        title="Fit All"
+                      >
+                        <Maximize2 size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div ref={chartContainerRef} className="h-[400px]" />
-                <div className="flex items-center gap-4 mt-4 text-sm">
+                
+                <div ref={chartContainerRef} className="h-[450px]" />
+                
+                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 rounded-sm bg-green-500"></span>
                     Bullish
@@ -380,6 +487,8 @@ function App() {
                     <span className="w-3 h-3 rounded-sm bg-red-500"></span>
                     Bearish
                   </span>
+                  <span className="text-gray-500">|</span>
+                  <span className="text-gray-500">Scroll to pan • Mouse wheel to zoom</span>
                 </div>
               </div>
 
