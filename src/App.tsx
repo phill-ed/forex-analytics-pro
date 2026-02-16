@@ -1204,7 +1204,7 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={loadRates} className="p-2 hover:bg-gray-100 rounded-lg" title="Refresh">
+            <button onClick={() => loadRates()} className="p-2 hover:bg-gray-100 rounded-lg" title="Refresh">
               <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
             </button>
             <button className="p-2 hover:bg-gray-100 rounded-lg"><Bell size={20} /></button>
